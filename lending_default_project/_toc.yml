@@ -1,0 +1,13 @@
+format: jb-book
+root: intro
+
+chapters:
+  - file: 1_contexto
+  - file: 2_dataset
+  - file: 3_eda
+  - file: 4_preprocesamiento
+  - file: 5_modelado_sklearn
+  - file: 6_modelado_pyspark
+  - file: 7_interpretabilidad_lime
+  - file: 8_comparacion_resultados
+  - file: 9_conclusiones

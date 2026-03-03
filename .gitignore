@@ -1,0 +1,7 @@
+data/
+*.csv
+*.pkl
+lending_default_project/models/
+__pycache__/
+.ipynb_checkpoints/
+_build/
