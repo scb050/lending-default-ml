@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>6. Modelado con PySpark (MLlib) &#8212; My sample book</title>
+    <title>6. Modelado con PySpark (MLlib) &#8212; Predicción de Default en Créditos</title>
   
   
   
@@ -158,8 +158,8 @@ const thebe_selector_output = ".output, .cell_output"
       
     
     
-    <img src="_static/logo.png" class="logo__image only-light" alt="My sample book - Home"/>
-    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="My sample book - Home"/>`);</script>
+    <img src="_static/logo.png" class="logo__image only-light" alt="Predicción de Default en Créditos - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Predicción de Default en Créditos - Home"/>`);</script>
   
   
 </a></div>
@@ -169,7 +169,7 @@ const thebe_selector_output = ".output, .cell_output"
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1">
                 <a class="reference internal" href="intro.html">
-                    Welcome to your Jupyter Book
+                    Predicción de Default en Créditos – Lending Club
                 </a>
             </li>
         </ul>
@@ -420,9 +420,7 @@ document.write(`
 </div>
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>JAVA_HOME = C:\Users\PC\miniconda3\envs\jb_lending\Library
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>openjdk version &quot;17.0.18&quot; 2026-01-20 LTS
+openjdk version &quot;17.0.18&quot; 2026-01-20 LTS
 OpenJDK Runtime Environment Zulu17.64+17-CA (build 17.0.18+8-LTS)
 OpenJDK 64-Bit Server VM Zulu17.64+17-CA (build 17.0.18+8-LTS, mixed mode, sharing)
 </pre></div>
@@ -470,6 +468,10 @@ OpenJDK 64-Bit Server VM Zulu17.64+17-CA (build 17.0.18+8-LTS, mixed mode, shari
             </div>
         </div></div>
 </div>
+<p>Se inicializa la <code class="docutils literal notranslate"><span class="pre">SparkSession</span></code> con el nombre <code class="docutils literal notranslate"><span class="pre">LendingClub_Default_PySpark</span></code> y se configura
+el número de particiones de shuffle en 200, parámetro relevante para el rendimiento en
+operaciones de agrupación y join sobre datasets de gran volumen. El entorno utiliza
+<strong>OpenJDK 17</strong> como backend de Java para la JVM de Spark.</p>
 </section>
 <section id="carga-del-dataset">
 <h2>6.2 Carga del dataset<a class="headerlink" href="#carga-del-dataset" title="Permalink to this heading">#</a></h2>
@@ -546,6 +548,11 @@ OpenJDK 64-Bit Server VM Zulu17.64+17-CA (build 17.0.18+8-LTS, mixed mode, shari
 </div>
 </div>
 </div>
+<p>El dataset original es cargado directamente desde el CSV crudo con inferencia de esquema.
+Spark lee <strong>2,260,701 filas y 151 columnas</strong>, conservando todas las categorías originales
+de <code class="docutils literal notranslate"><span class="pre">loan_status</span></code>. La distribución de estados es idéntica a la observada en el EDA inicial,
+con <strong>Fully Paid</strong> (1,076,751) y <strong>Charged Off</strong> (268,559) como las categorías de interés
+para la clasificación binaria.</p>
 </section>
 <section id="creacion-de-la-etiqueta-label">
 <h2>6.3 Creación de la etiqueta (label)<a class="headerlink" href="#creacion-de-la-etiqueta-label" title="Permalink to this heading">#</a></h2>
@@ -590,6 +597,13 @@ OpenJDK 64-Bit Server VM Zulu17.64+17-CA (build 17.0.18+8-LTS, mixed mode, shari
 </div>
 </div>
 </div>
+<p>Se filtra el dataset a las dos clases de interés y se construye la variable objetivo <code class="docutils literal notranslate"><span class="pre">label</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> → Fully Paid (1,076,751 registros)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> → Charged Off (268,559 registros)</p></li>
+</ul>
+<p>La proporción resultante es equivalente a la utilizada en el modelado con scikit-learn
+(~80/20), garantizando comparabilidad entre ambos enfoques.</p>
 </section>
 <section id="seleccion-de-variables-limpieza-y-balanceo-weight">
 <h2>6.4 Selección de variables, limpieza y balanceo (weight)<a class="headerlink" href="#seleccion-de-variables-limpieza-y-balanceo-weight" title="Permalink to this heading">#</a></h2>
@@ -659,6 +673,17 @@ w0: 0.6247080337050999 w1: 2.504682397536482
 </div>
 </div>
 </div>
+<p>Dado que PySpark MLlib requiere columnas de tipo <code class="docutils literal notranslate"><span class="pre">double</span></code>, se realiza un <strong>cast robusto</strong>
+eliminando caracteres como <code class="docutils literal notranslate"><span class="pre">%</span></code> y <code class="docutils literal notranslate"><span class="pre">,</span></code> antes de la conversión. Se trabaja con un subconjunto
+de <strong>9 variables numéricas</strong> y <strong>6 categóricas</strong>, priorizando las de mayor relevancia
+identificada en el EDA.</p>
+<p>Para compensar el desbalance de clases se calculan pesos inversos a la frecuencia:</p>
+<ul class="simple">
+<li><p><strong>Clase 0 (No default):</strong> peso = 0.625</p></li>
+<li><p><strong>Clase 1 (Default):</strong> peso = 2.505</p></li>
+</ul>
+<p>Esto es equivalente al parámetro <code class="docutils literal notranslate"><span class="pre">class_weight='balanced'</span></code> de scikit-learn, y se aplicará
+al modelo mediante el parámetro <code class="docutils literal notranslate"><span class="pre">weightCol</span></code>.</p>
 </section>
 <section id="construccion-del-pipeline">
 <h2>6.5 Construcción del pipeline<a class="headerlink" href="#construccion-del-pipeline" title="Permalink to this heading">#</a></h2>
@@ -716,6 +741,17 @@ w0: 0.6247080337050999 w1: 2.504682397536482
 </div>
 </div>
 </div>
+<p>El pipeline de PySpark MLlib se compone de las siguientes etapas:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">StringIndexer</span></code>: convierte cada variable categórica a índice numérico.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OneHotEncoder</span></code>: codifica los índices en vectores binarios dispersos.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Imputer</span></code>: imputa valores nulos en variables numéricas con la media.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VectorAssembler</span></code>: ensambla todas las variables transformadas en un único vector <code class="docutils literal notranslate"><span class="pre">features</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LogisticRegression</span></code>: modelo de clasificación con <code class="docutils literal notranslate"><span class="pre">weightCol='weight'</span></code> y <code class="docutils literal notranslate"><span class="pre">maxIter=50</span></code>.</p></li>
+</ol>
+<p>Se optó por <strong>Regresión Logística</strong> en lugar de Random Forest dado que MLlib no soporta
+<code class="docutils literal notranslate"><span class="pre">weightCol</span></code> nativamente en <code class="docutils literal notranslate"><span class="pre">RandomForestClassifier</span></code>, y la regresión logística ofrece
+mayor compatibilidad con el esquema de pesos para balanceo de clases.</p>
 </section>
 <section id="entrenamiento-y-prediccion">
 <h2>6.6 Entrenamiento y predicción<a class="headerlink" href="#entrenamiento-y-prediccion" title="Permalink to this heading">#</a></h2>
@@ -760,6 +796,13 @@ only showing top 5 rows
 </div>
 </div>
 </div>
+<p>El dataset se divide aleatoriamente en <strong>80% entrenamiento</strong> y <strong>20% prueba</strong> con semilla
+fija (<code class="docutils literal notranslate"><span class="pre">seed=42</span></code>). El pipeline se entrena en <strong>137.56 segundos (~2.3 minutos)</strong>, significativamente
+más rápido que el GridSearchCV de scikit-learn (~847 s), aunque con un modelo más simple
+(Regresión Logística vs. Random Forest).</p>
+<p>El tiempo de predicción fue de apenas <strong>0.25 segundos</strong>, reflejando la eficiencia del motor
+distribuido de Spark para la fase de inferencia. Las primeras predicciones muestran
+probabilidades de default variadas, indicando que el modelo discrimina entre perfiles de riesgo.</p>
 </section>
 <section id="evaluacion-de-metricas-y-ajuste-de-threshold">
 <h2>6.7 Evaluación de métricas y ajuste de threshold<a class="headerlink" href="#evaluacion-de-metricas-y-ajuste-de-threshold" title="Permalink to this heading">#</a></h2>
@@ -815,6 +858,56 @@ Se evalúan métricas usando un threshold ajustable basado en la probabilidad de
 </div>
 </div>
 </div>
+<p>Con el umbral por defecto de 0.5, el modelo alcanza un Recall de 0.667 pero una Precision
+baja (0.311), reflejando que la Regresión Logística tiende a ser conservadora en la
+detección de defaults. Se evalúan múltiples umbrales para analizar el trade-off:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Threshold</p></th>
+<th class="head"><p>Accuracy</p></th>
+<th class="head"><p>Precision</p></th>
+<th class="head"><p>Recall</p></th>
+<th class="head"><p>F1</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0.50</p></td>
+<td><p>0.6395</p></td>
+<td><p>0.3116</p></td>
+<td><p>0.6674</p></td>
+<td><p>0.4248</p></td>
+</tr>
+<tr class="row-odd"><td><p>0.30</p></td>
+<td><p>0.3889</p></td>
+<td><p>0.2376</p></td>
+<td><p>0.9341</p></td>
+<td><p>0.3788</p></td>
+</tr>
+<tr class="row-even"><td><p>0.20</p></td>
+<td><p>0.2849</p></td>
+<td><p>0.2158</p></td>
+<td><p>0.9815</p></td>
+<td><p>0.3538</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>0.15</strong></p></td>
+<td><p><strong>0.2319</strong></p></td>
+<td><p><strong>0.2056</strong></p></td>
+<td><p><strong>0.9954</strong></p></td>
+<td><p><strong>0.3408</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>0.10</p></td>
+<td><p>0.2034</p></td>
+<td><p>0.2002</p></td>
+<td><p>0.9994</p></td>
+<td><p>0.3336</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Se selecciona <strong>threshold = 0.15</strong> como punto de operación final, priorizando un <strong>Recall
+de 0.9954</strong> (detecta el 99.5% de los defaults) a costa de una Precision más baja. Esta
+decisión es coherente con el contexto de riesgo crediticio, donde un falso negativo
+(default no detectado) tiene mayor costo que un falso positivo.</p>
 </section>
 <section id="roc-auc">
 <h2>6.8 ROC-AUC<a class="headerlink" href="#roc-auc" title="Permalink to this heading">#</a></h2>
@@ -840,6 +933,12 @@ Se evalúan métricas usando un threshold ajustable basado en la probabilidad de
 </div>
 </div>
 </div>
+<p>El modelo de Regresión Logística en PySpark obtiene un <strong>ROC-AUC de 0.708</strong>, considerablemente
+inferior al <strong>0.951</strong> alcanzado por el Random Forest en scikit-learn. Esta diferencia se
+explica por dos factores principales: el uso de un modelo más simple (regresión logística
+vs. ensemble de árboles) y el trabajo con un subconjunto reducido de variables (15 vs. 133).
+Este resultado refuerza la importancia de la selección de modelo y la riqueza del feature
+space en tareas de predicción de riesgo crediticio.</p>
 </section>
 </section>
 
@@ -929,7 +1028,7 @@ Se evalúan métricas usando un threshold ajustable basado en la probabilidad de
   <div class="footer-item">
     
 <p class="component-author">
-By The Jupyter Book Community
+By Mateo Chang, Juan Camilo Conrado, Sergio Cadavid
 </p>
 
   </div>

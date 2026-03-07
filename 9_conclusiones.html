@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>9. Conclusiones Generales &#8212; My sample book</title>
+    <title>9. Conclusiones Generales &#8212; Predicción de Default en Créditos</title>
   
   
   
@@ -157,8 +157,8 @@ const thebe_selector_output = ".output, .cell_output"
       
     
     
-    <img src="_static/logo.png" class="logo__image only-light" alt="My sample book - Home"/>
-    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="My sample book - Home"/>`);</script>
+    <img src="_static/logo.png" class="logo__image only-light" alt="Predicción de Default en Créditos - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Predicción de Default en Créditos - Home"/>`);</script>
   
   
 </a></div>
@@ -168,7 +168,7 @@ const thebe_selector_output = ".output, .cell_output"
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1">
                 <a class="reference internal" href="intro.html">
-                    Welcome to your Jupyter Book
+                    Predicción de Default en Créditos – Lending Club
                 </a>
             </li>
         </ul>
@@ -435,14 +435,10 @@ document.write(`
 </section>
 <section id="interpretabilidad-del-modelo">
 <h2>9.5 Interpretabilidad del Modelo<a class="headerlink" href="#interpretabilidad-del-modelo" title="Permalink to this heading">#</a></h2>
-<p>El uso de LIME permitió aproximar el comportamiento del modelo en predicciones individuales, identificando variables relevantes como:</p>
-<ul class="simple">
-<li><p>Tasa de interés.</p></li>
-<li><p>Relación deuda-ingreso.</p></li>
-<li><p>Ingreso anual.</p></li>
-<li><p>Historial crediticio.</p></li>
-</ul>
-<p>Esto aporta transparencia al sistema y mejora la confianza en la toma de decisiones basada en modelos automatizados.</p>
+<p>El análisis LIME identificó que las variables con mayor presencia en las explicaciones
+locales fueron indicadores de reestructuración financiera como <code class="docutils literal notranslate"><span class="pre">settlement_status</span></code>,
+<code class="docutils literal notranslate"><span class="pre">debt_settlement_flag_date</span></code> y <code class="docutils literal notranslate"><span class="pre">hardship_amount</span></code>, lo que sugiere que el modelo aprendió
+a asociar estos eventos adversos con mayor probabilidad de default.</p>
 </section>
 <section id="conclusion-final">
 <h2>9.6 Conclusión Final<a class="headerlink" href="#conclusion-final" title="Permalink to this heading">#</a></h2>
@@ -533,7 +529,7 @@ document.write(`
   <div class="footer-item">
     
 <p class="component-author">
-By The Jupyter Book Community
+By Mateo Chang, Juan Camilo Conrado, Sergio Cadavid
 </p>
 
   </div>

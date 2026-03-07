@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>7. Interpretabilidad del Modelo con LIME &#8212; My sample book</title>
+    <title>7. Interpretabilidad del Modelo con LIME &#8212; Predicción de Default en Créditos</title>
   
   
   
@@ -158,8 +158,8 @@ const thebe_selector_output = ".output, .cell_output"
       
     
     
-    <img src="_static/logo.png" class="logo__image only-light" alt="My sample book - Home"/>
-    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="My sample book - Home"/>`);</script>
+    <img src="_static/logo.png" class="logo__image only-light" alt="Predicción de Default en Créditos - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Predicción de Default en Créditos - Home"/>`);</script>
   
   
 </a></div>
@@ -169,7 +169,7 @@ const thebe_selector_output = ".output, .cell_output"
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1">
                 <a class="reference internal" href="intro.html">
-                    Welcome to your Jupyter Book
+                    Predicción de Default en Créditos – Lending Club
                 </a>
             </li>
         </ul>
@@ -467,6 +467,9 @@ dict_keys([&#39;prep&#39;, &#39;model&#39;])
 </div>
 </div>
 </div>
+<p>El pipeline completo (preprocesamiento + Random Forest) entrenado en el capítulo 5 se
+restaura correctamente desde disco usando <code class="docutils literal notranslate"><span class="pre">joblib</span></code>. El objeto cargado es un <code class="docutils literal notranslate"><span class="pre">sklearn.pipeline.Pipeline</span></code>
+con dos etapas: <code class="docutils literal notranslate"><span class="pre">prep</span></code> (ColumnTransformer) y <code class="docutils literal notranslate"><span class="pre">model</span></code> (RandomForestClassifier).</p>
 </section>
 <section id="preparacion-de-datos-para-lime-matriz-numerica">
 <h2>7.2 Preparación de datos para LIME (matriz numérica)<a class="headerlink" href="#preparacion-de-datos-para-lime-matriz-numerica" title="Permalink to this heading">#</a></h2>
@@ -75135,7 +75138,7 @@ cat__last_credit_pull_d_Sep-2016: 4
   <div class="footer-item">
     
 <p class="component-author">
-By The Jupyter Book Community
+By Mateo Chang, Juan Camilo Conrado, Sergio Cadavid
 </p>
 
   </div>

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>2. Dataset &#8212; My sample book</title>
+    <title>2. Dataset &#8212; Predicción de Default en Créditos</title>
   
   
   
@@ -158,8 +158,8 @@ const thebe_selector_output = ".output, .cell_output"
       
     
     
-    <img src="_static/logo.png" class="logo__image only-light" alt="My sample book - Home"/>
-    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="My sample book - Home"/>`);</script>
+    <img src="_static/logo.png" class="logo__image only-light" alt="Predicción de Default en Créditos - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Predicción de Default en Créditos - Home"/>`);</script>
   
   
 </a></div>
@@ -169,7 +169,7 @@ const thebe_selector_output = ".output, .cell_output"
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1">
                 <a class="reference internal" href="intro.html">
-                    Welcome to your Jupyter Book
+                    Predicción de Default en Créditos – Lending Club
                 </a>
             </li>
         </ul>
@@ -479,6 +479,14 @@ y se inspecciona su estructura general: dimensiones, columnas y primeras observa
 </div>
 </div>
 </div>
+<p>El dataset utilizado corresponde a préstamos otorgados por <strong>Lending Club</strong> entre 2007 y 2018 (Q4).
+Tras la carga inicial, el dataset cuenta con <strong>2,260,701 registros</strong> y <strong>151 columnas</strong>, lo que
+lo convierte en un conjunto de datos de gran volumen que abarca variables financieras,
+demográficas y de comportamiento de pago de los solicitantes.</p>
+<p>Entre las columnas visibles se observan variables como el monto del préstamo (<code class="docutils literal notranslate"><span class="pre">loan_amnt</span></code>),
+la tasa de interés (<code class="docutils literal notranslate"><span class="pre">int_rate</span></code>), el plazo (<code class="docutils literal notranslate"><span class="pre">term</span></code>), la calificación crediticia (<code class="docutils literal notranslate"><span class="pre">grade</span></code>, <code class="docutils literal notranslate"><span class="pre">sub_grade</span></code>)
+y la cuota mensual (<code class="docutils literal notranslate"><span class="pre">installment</span></code>), entre otras. Se aprecia también la presencia de valores
+nulos en varias columnas, lo que anticipa la necesidad de un proceso de limpieza y preprocesamiento.</p>
 </section>
 <section id="definicion-de-la-variable-objetivo">
 <h2>2.2 Definición de la variable objetivo<a class="headerlink" href="#definicion-de-la-variable-objetivo" title="Permalink to this heading">#</a></h2>
@@ -511,6 +519,16 @@ Name: count, dtype: int64
 </div>
 </div>
 </div>
+<p>La variable objetivo <code class="docutils literal notranslate"><span class="pre">loan_status</span></code> presenta 9 categorías en el dataset original. Para este
+proyecto, se conservan únicamente los registros con estado <strong>“Fully Paid”</strong> (1,076,751 casos)
+y <strong>“Charged Off”</strong> (268,559 casos), que representan préstamos con resultado definitivo y claro.</p>
+<p>Los demás estados — como <em>Current</em>, <em>Late</em>, <em>In Grace Period</em> o <em>Default</em> — se excluyen del
+análisis al tratarse de préstamos aún activos o en situación ambigua, lo que introduciría
+ruido en el modelo. Esto reduce el dataset a un problema de <strong>clasificación binaria</strong>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> → Fully Paid (préstamo pagado correctamente)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> → Charged Off (préstamo en incumplimiento)</p></li>
+</ul>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Filtrar solo clases binarias</span>
@@ -529,6 +547,13 @@ Name: count, dtype: int64
 </div>
 </div>
 </div>
+<p>Tras el filtrado, el dataset queda con <strong>1,345,310 registros</strong> distribuidos en dos clases:</p>
+<ul class="simple">
+<li><p><strong>Fully Paid:</strong> 1,076,751 registros (≈ 80%)</p></li>
+<li><p><strong>Charged Off:</strong> 268,559 registros (≈ 20%)</p></li>
+</ul>
+<p>Se evidencia un <strong>desbalance de clases</strong> significativo, con una proporción aproximada de 4:1,
+lo cual deberá ser considerado durante el entrenamiento y la evaluación del modelo.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Crear variable binaria</span>
@@ -553,6 +578,13 @@ Name: count, dtype: int64
 </div>
 </div>
 </div>
+<p>Se crea la variable objetivo binaria <code class="docutils literal notranslate"><span class="pre">default</span></code> a partir de <code class="docutils literal notranslate"><span class="pre">loan_status</span></code>, confirmando la
+codificación:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code> (No default): 1,076,751 registros</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code> (Default): 268,559 registros</p></li>
+</ul>
+<p>El dataset queda listo con la variable objetivo definida para el entrenamiento de los modelos.</p>
 </section>
 <section id="balance-de-clases">
 <h2>2.3 Balance de clases<a class="headerlink" href="#balance-de-clases" title="Permalink to this heading">#</a></h2>
@@ -573,6 +605,15 @@ Name: proportion, dtype: float64
 </div>
 </div>
 </div>
+<p>El análisis de proporciones confirma el desbalance de clases:</p>
+<ul class="simple">
+<li><p><strong>Clase 0 (No default):</strong> 80.04% de los registros</p></li>
+<li><p><strong>Clase 1 (Default):</strong> 19.96% de los registros</p></li>
+</ul>
+<p>El dataset presenta un desbalance moderado-alto, con una relación aproximada de <strong>4:1</strong>.
+Esto implica que un modelo naive que prediga siempre “no default” alcanzaría un 80% de
+accuracy, por lo que se deberán priorizar métricas como <strong>Recall, F1-score y ROC-AUC</strong>
+para evaluar correctamente el desempeño.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
@@ -589,6 +630,10 @@ Name: proportion, dtype: float64
 <img alt="_images/b7fa99c9e3ca3b621ab00bcc2f7f41d935153240b78f4a48167ecbf2d70a76f1.png" src="_images/b7fa99c9e3ca3b621ab00bcc2f7f41d935153240b78f4a48167ecbf2d70a76f1.png" />
 </div>
 </div>
+<p>El gráfico de barras ilustra visualmente el desbalance entre clases. La barra de <strong>Fully Paid (0)</strong>
+supera el millón de registros, mientras que <strong>Charged Off (1)</strong> se sitúa alrededor de los 268,000,
+confirmando la proporción 4:1 identificada anteriormente. Este desbalance será un factor clave
+a considerar en la estrategia de modelado.</p>
 </section>
 <section id="tipos-de-variables">
 <h2>2.4 Tipos de variables<a class="headerlink" href="#tipos-de-variables" title="Permalink to this heading">#</a></h2>
@@ -609,6 +654,14 @@ Name: count, dtype: int64
 </div>
 </div>
 </div>
+<p>El dataset cuenta con <strong>152 columnas</strong> distribuidas en tres tipos de datos:</p>
+<ul class="simple">
+<li><p><strong>float64:</strong> 113 columnas — variables numéricas continuas (montos, tasas, porcentajes, etc.)</p></li>
+<li><p><strong>str/object:</strong> 38 columnas — variables categóricas o de texto</p></li>
+<li><p><strong>int64:</strong> 1 columna — variable numérica entera</p></li>
+</ul>
+<p>Esta composición indica que el preprocesamiento deberá incluir el tratamiento de variables
+categóricas (codificación) y la revisión de columnas numéricas con posibles valores nulos o atípicos.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">numerical_cols</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;int64&quot;</span><span class="p">,</span> <span class="s2">&quot;float64&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">columns</span>
@@ -631,6 +684,8 @@ See https://pandas.pydata.org/docs/user_guide/migration-3-strings.html#string-mi
 </div>
 </div>
 </div>
+<p>Se identifican <strong>114 variables numéricas</strong> (int64 y float64) y <strong>38 variables categóricas</strong> (object),
+las cuales serán tratadas de forma diferenciada durante el preprocesamiento.</p>
 </section>
 <section id="analisis-de-valores-nulos">
 <h2>2.5 Análisis de valores nulos<a class="headerlink" href="#analisis-de-valores-nulos" title="Permalink to this heading">#</a></h2>
@@ -776,6 +831,19 @@ Esto permitirá definir estrategias de imputación o eliminación.</p>
 </table>
 </div></div></div>
 </div>
+<p>El análisis de valores nulos revela que varias columnas presentan una cantidad crítica de
+datos faltantes. Las 20 variables con mayor porcentaje de nulos son en su mayoría relacionadas
+con programas de dificultad financiera (<em>hardship</em>) y solicitudes conjuntas (<em>sec_app</em>):</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">member_id</span></code> y <code class="docutils literal notranslate"><span class="pre">next_pymnt_d</span></code>:</strong> 100% de valores nulos — serán eliminadas por no aportar
+información útil.</p></li>
+<li><p><strong>Variables <code class="docutils literal notranslate"><span class="pre">hardship_*</span></code>:</strong> Entre 99.57% y 100% de nulos — corresponden a casos excepcionales
+de reestructuración de deuda, con cobertura mínima en el dataset.</p></li>
+<li><p><strong>Variables <code class="docutils literal notranslate"><span class="pre">sec_app_*</span></code> y <code class="docutils literal notranslate"><span class="pre">revol_bal_joint</span></code>:</strong> Alrededor del 98-99% de nulos — asociadas a
+solicitudes conjuntas, igualmente poco representadas.</p></li>
+</ul>
+<p>Estas columnas con más del 95% de valores faltantes serán candidatas directas para <strong>eliminación</strong>
+en la etapa de preprocesamiento.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;../data/accepted_clean.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -869,7 +937,7 @@ Esto permitirá definir estrategias de imputación o eliminación.</p>
   <div class="footer-item">
     
 <p class="component-author">
-By The Jupyter Book Community
+By Mateo Chang, Juan Camilo Conrado, Sergio Cadavid
 </p>
 
   </div>

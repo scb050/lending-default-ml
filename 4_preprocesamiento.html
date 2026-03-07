@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>4. Preprocesamiento de Datos &#8212; My sample book</title>
+    <title>4. Preprocesamiento de Datos &#8212; Predicción de Default en Créditos</title>
   
   
   
@@ -158,8 +158,8 @@ const thebe_selector_output = ".output, .cell_output"
       
     
     
-    <img src="_static/logo.png" class="logo__image only-light" alt="My sample book - Home"/>
-    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="My sample book - Home"/>`);</script>
+    <img src="_static/logo.png" class="logo__image only-light" alt="Predicción de Default en Créditos - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Predicción de Default en Créditos - Home"/>`);</script>
   
   
 </a></div>
@@ -169,7 +169,7 @@ const thebe_selector_output = ".output, .cell_output"
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1">
                 <a class="reference internal" href="intro.html">
-                    Welcome to your Jupyter Book
+                    Predicción de Default en Créditos – Lending Club
                 </a>
             </li>
         </ul>
@@ -480,6 +480,10 @@ y se construye la matriz final de entrenamiento.</p>
 </div>
 </div>
 </div>
+<p>Se carga el dataset preprocesado <code class="docutils literal notranslate"><span class="pre">accepted_clean.csv</span></code>, que conserva los registros filtrados
+a las clases binarias (Fully Paid / Charged Off). El dataset cuenta con <strong>1,345,310 registros
+y 152 columnas</strong>, confirmando la integridad de los datos tras el filtrado realizado en la
+etapa de exploración.</p>
 </section>
 <section id="eliminacion-de-variables-con-data-leakage">
 <h2>4.2 Eliminación de variables con data leakage<a class="headerlink" href="#eliminacion-de-variables-con-data-leakage" title="Permalink to this heading">#</a></h2>
@@ -519,6 +523,11 @@ ya que introducirían fuga de información (data leakage).</p>
 </div>
 </div>
 </div>
+<p>Se eliminan <strong>17 variables</strong> que contienen información posterior al otorgamiento del préstamo
+y que, por tanto, no estarían disponibles al momento de predecir. Entre ellas se encuentran
+identificadores (<code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">member_id</span></code>, <code class="docutils literal notranslate"><span class="pre">url</span></code>), fechas de pago (<code class="docutils literal notranslate"><span class="pre">last_pymnt_d</span></code>, <code class="docutils literal notranslate"><span class="pre">next_pymnt_d</span></code>),
+y variables de recuperación post-default (<code class="docutils literal notranslate"><span class="pre">recoveries</span></code>, <code class="docutils literal notranslate"><span class="pre">collection_recovery_fee</span></code>, <code class="docutils literal notranslate"><span class="pre">total_pymnt</span></code>,
+<code class="docutils literal notranslate"><span class="pre">total_rec_prncp</span></code>, entre otras). Tras la eliminación, el dataset queda con <strong>135 columnas</strong>.</p>
 </section>
 <section id="separacion-de-variables-predictoras-y-target">
 <h2>4.3 Separación de variables predictoras y target<a class="headerlink" href="#separacion-de-variables-predictoras-y-target" title="Permalink to this heading">#</a></h2>
@@ -541,6 +550,9 @@ Shape y: (1345310,)
 </div>
 </div>
 </div>
+<p>Se separa la matriz de características <code class="docutils literal notranslate"><span class="pre">X</span></code> (133 variables predictoras) de la variable
+objetivo <code class="docutils literal notranslate"><span class="pre">y</span></code> (<code class="docutils literal notranslate"><span class="pre">default</span></code>), eliminando también <code class="docutils literal notranslate"><span class="pre">loan_status</span></code> por ser redundante con el target.
+Ambos conjuntos conservan los <strong>1,345,310 registros</strong> del dataset filtrado.</p>
 </section>
 <section id="identificacion-de-tipos-de-variables">
 <h2>4.4 Identificación de tipos de variables<a class="headerlink" href="#identificacion-de-tipos-de-variables" title="Permalink to this heading">#</a></h2>
@@ -568,6 +580,9 @@ See https://pandas.pydata.org/docs/user_guide/migration-3-strings.html#string-mi
 </div>
 </div>
 </div>
+<p>Sobre la matriz <code class="docutils literal notranslate"><span class="pre">X</span></code> se identifican <strong>105 variables numéricas</strong> (int64/float64) y
+<strong>28 variables categóricas</strong> (object), que serán tratadas de forma diferenciada en el
+pipeline de preprocesamiento.</p>
 </section>
 <section id="division-train-test">
 <h2>4.5 División Train-Test<a class="headerlink" href="#division-train-test" title="Permalink to this heading">#</a></h2>
@@ -595,6 +610,10 @@ Test: (269062, 133)
 </div>
 </div>
 </div>
+<p>El dataset se divide en <strong>80% entrenamiento</strong> (1,076,248 registros) y <strong>20% prueba</strong>
+(269,062 registros), utilizando <code class="docutils literal notranslate"><span class="pre">stratify=y</span></code> para garantizar que la proporción de clases
+(~80/20 entre no-default y default) se preserve en ambos conjuntos. Se fija <code class="docutils literal notranslate"><span class="pre">random_state=42</span></code>
+para asegurar reproducibilidad.</p>
 </section>
 <section id="pipeline-de-preprocesamiento">
 <h2>4.6 Pipeline de preprocesamiento<a class="headerlink" href="#pipeline-de-preprocesamiento" title="Permalink to this heading">#</a></h2>
@@ -1877,6 +1896,19 @@ function forceTheme(elementId) {
 
 forceTheme('sk-container-id-1');</script></body></div></div>
 </div>
+<p>Se construye un <code class="docutils literal notranslate"><span class="pre">ColumnTransformer</span></code> con dos pipelines diferenciados:</p>
+<ul class="simple">
+<li><p><strong>Pipeline numérico (<code class="docutils literal notranslate"><span class="pre">num</span></code>):</strong> Imputa valores faltantes con la <strong>mediana</strong>
+(<code class="docutils literal notranslate"><span class="pre">SimpleImputer(strategy='median')</span></code>) y escala las variables con <strong>StandardScaler</strong>,
+centrando en media 0 y desviación estándar 1. Se elige la mediana por ser robusta
+ante los outliers detectados en el EDA.</p></li>
+<li><p><strong>Pipeline categórico (<code class="docutils literal notranslate"><span class="pre">cat</span></code>):</strong> Imputa valores faltantes con la <strong>moda</strong>
+(<code class="docutils literal notranslate"><span class="pre">SimpleImputer(strategy='most_frequent')</span></code>) y aplica <strong>One-Hot Encoding</strong>
+(<code class="docutils literal notranslate"><span class="pre">OneHotEncoder(handle_unknown='ignore')</span></code>), ignorando categorías no vistas durante
+el entrenamiento para evitar errores en la fase de predicción.</p></li>
+</ul>
+<p>El preprocesador se ajustará únicamente sobre el conjunto de entrenamiento y se aplicará
+al conjunto de prueba, evitando cualquier fuga de información.</p>
 </section>
 </section>
 
@@ -1964,7 +1996,7 @@ forceTheme('sk-container-id-1');</script></body></div></div>
   <div class="footer-item">
     
 <p class="component-author">
-By The Jupyter Book Community
+By Mateo Chang, Juan Camilo Conrado, Sergio Cadavid
 </p>
 
   </div>

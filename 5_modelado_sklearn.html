@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>5. Modelado con scikit-learn &#8212; My sample book</title>
+    <title>5. Modelado con scikit-learn &#8212; Predicción de Default en Créditos</title>
   
   
   
@@ -158,8 +158,8 @@ const thebe_selector_output = ".output, .cell_output"
       
     
     
-    <img src="_static/logo.png" class="logo__image only-light" alt="My sample book - Home"/>
-    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="My sample book - Home"/>`);</script>
+    <img src="_static/logo.png" class="logo__image only-light" alt="Predicción de Default en Créditos - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Predicción de Default en Créditos - Home"/>`);</script>
   
   
 </a></div>
@@ -169,7 +169,7 @@ const thebe_selector_output = ".output, .cell_output"
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1">
                 <a class="reference internal" href="intro.html">
-                    Welcome to your Jupyter Book
+                    Predicción de Default en Créditos – Lending Club
                 </a>
             </li>
         </ul>
@@ -523,6 +523,8 @@ Se utiliza <strong>RandomForestClassifier</strong> y se ajustan hiperparámetros
 </div>
 </div>
 </div>
+<p>Se carga el dataset limpio <code class="docutils literal notranslate"><span class="pre">accepted_clean.csv</span></code> y se separan las variables predictoras <code class="docutils literal notranslate"><span class="pre">X</span></code>
+(150 columnas) de la variable objetivo <code class="docutils literal notranslate"><span class="pre">y</span></code> (<code class="docutils literal notranslate"><span class="pre">default</span></code>), sobre un total de <strong>1,345,310 registros</strong>.</p>
 </section>
 <section id="division-train-test">
 <h2>5.2 División Train/Test<a class="headerlink" href="#division-train-test" title="Permalink to this heading">#</a></h2>
@@ -551,6 +553,9 @@ Test : (269062, 150) (269062,)
 </div>
 </div>
 </div>
+<p>El dataset se divide en <strong>80% entrenamiento</strong> (1,076,248 registros) y <strong>20% prueba</strong>
+(269,062 registros) con <code class="docutils literal notranslate"><span class="pre">stratify=y</span></code>, preservando la proporción de clases en ambos
+conjuntos y asegurando una evaluación representativa del modelo.</p>
 </section>
 <section id="preprocesamiento-pipeline">
 <h2>5.3 Preprocesamiento (Pipeline)<a class="headerlink" href="#preprocesamiento-pipeline" title="Permalink to this heading">#</a></h2>
@@ -595,6 +600,8 @@ See https://pandas.pydata.org/docs/user_guide/migration-3-strings.html#string-mi
 </div>
 </div>
 </div>
+<p>El pipeline de preprocesamiento se construye y aplica de forma diferenciada según el tipo
+de variable, sin producir salida visible. Su configuración se detalla en la sección 4.6.</p>
 </section>
 <section id="validacion-cruzada-y-seleccion-de-hiperparametros">
 <h2>5.4 Validación cruzada y selección de hiperparámetros<a class="headerlink" href="#validacion-cruzada-y-seleccion-de-hiperparametros" title="Permalink to this heading">#</a></h2>
@@ -665,6 +672,16 @@ Tiempo entrenamiento (GridSearch): 809.76 s
 </div>
 </div>
 </div>
+<p>El <code class="docutils literal notranslate"><span class="pre">GridSearchCV</span></code> evaluó <strong>4 combinaciones</strong> de hiperparámetros (<code class="docutils literal notranslate"><span class="pre">n_estimators</span></code>: [50, 100],
+<code class="docutils literal notranslate"><span class="pre">max_depth</span></code>: [10, 15]) con validación cruzada de 3 folds y métrica de optimización F1-score.
+Se utilizó <code class="docutils literal notranslate"><span class="pre">class_weight='balanced'</span></code> para compensar el desbalance de clases.</p>
+<p>Los mejores hiperparámetros encontrados fueron:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">max_depth</span></code>: 15</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n_estimators</span></code>: 100</p></li>
+</ul>
+<p>El proceso de búsqueda tomó aproximadamente <strong>809 segundos (~13.5 minutos)</strong>, lo que refleja
+el alto costo computacional de entrenar un Random Forest sobre más de un millón de registros.</p>
 </section>
 </section>
 <section id="evaluacion-del-modelo-en-test-metricas">
@@ -716,6 +733,36 @@ ROC AUC  : 0.9511
 </div>
 </div>
 </div>
+<p>El modelo final, evaluado sobre el conjunto de prueba, obtiene los siguientes resultados:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Métrica</p></th>
+<th class="head"><p>Valor</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Accuracy</p></td>
+<td><p>0.9204</p></td>
+</tr>
+<tr class="row-odd"><td><p>Precision</p></td>
+<td><p>0.7818</p></td>
+</tr>
+<tr class="row-even"><td><p>Recall</p></td>
+<td><p>0.8337</p></td>
+</tr>
+<tr class="row-odd"><td><p>F1-score</p></td>
+<td><p>0.8070</p></td>
+</tr>
+<tr class="row-even"><td><p>ROC AUC</p></td>
+<td><p>0.9511</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>El modelo muestra un desempeño sólido. El <strong>Recall de 0.8337</strong> indica que detecta
+correctamente el 83.4% de los casos de default, lo cual es especialmente relevante
+en el contexto de riesgo crediticio donde los falsos negativos tienen alto costo financiero.
+El <strong>ROC AUC de 0.9511</strong> refleja una excelente capacidad discriminativa entre clases.</p>
 </section>
 <section id="matriz-de-confusion">
 <h2>5.6 Matriz de confusión<a class="headerlink" href="#matriz-de-confusion" title="Permalink to this heading">#</a></h2>
@@ -748,6 +795,10 @@ ROC AUC  : 0.9511
 <img alt="_images/7bc7c09779f48b00fe3f4e472f5475cab4b9c6d45a72e23048ecaf3feb467fb8.png" src="_images/7bc7c09779f48b00fe3f4e472f5475cab4b9c6d45a72e23048ecaf3feb467fb8.png" />
 </div>
 </div>
+<p>La matriz de confusión permite desglosar los errores del modelo. Se espera observar
+una proporción de <strong>Falsos Negativos</strong> (defaults no detectados) reducida gracias al
+uso de <code class="docutils literal notranslate"><span class="pre">class_weight='balanced'</span></code> y al alto Recall alcanzado, aunque a costa de algunos
+<strong>Falsos Positivos</strong> (clientes buenos clasificados como default).</p>
 </section>
 <section id="curva-roc">
 <h2>5.7 Curva ROC<a class="headerlink" href="#curva-roc" title="Permalink to this heading">#</a></h2>
@@ -773,6 +824,10 @@ El AUC (área bajo la curva) se reporta como medida global de desempeño.</p>
 <img alt="_images/09c30c9067f4a6681e8c7b520f9ca02727b17058805b71006f4270c705e9f242.png" src="_images/09c30c9067f4a6681e8c7b520f9ca02727b17058805b71006f4270c705e9f242.png" />
 </div>
 </div>
+<p>La curva ROC se aleja notablemente de la diagonal (clasificador aleatorio), confirmando
+la alta capacidad discriminativa del modelo. El <strong>AUC de 0.9511</strong> indica que el modelo
+tiene una probabilidad del 95.1% de clasificar correctamente un par aleatorio de instancias
+(una de cada clase), lo que constituye un resultado excelente para este problema.</p>
 </section>
 <section id="tabla-resumen-de-resultados-sklearn">
 <h2>5.8 Tabla resumen de resultados (sklearn)<a class="headerlink" href="#tabla-resumen-de-resultados-sklearn" title="Permalink to this heading">#</a></h2>
@@ -841,6 +896,35 @@ para comparar posteriormente con PySpark.</p>
   </tbody>
 </table>
 </div></div></div>
+</div>
+<p>Se consolidan los resultados del modelo en una tabla resumen para facilitar la comparación
+posterior con la implementación en PySpark. El mejor estimador obtenido por <code class="docutils literal notranslate"><span class="pre">GridSearchCV</span></code>
+se persiste en disco (<code class="docutils literal notranslate"><span class="pre">models/rf_model.pkl</span></code>) mediante <code class="docutils literal notranslate"><span class="pre">joblib</span></code> para su reutilización sin
+necesidad de reentrenamiento.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Modelo</p></th>
+<th class="head"><p>Accuracy</p></th>
+<th class="head"><p>Precision</p></th>
+<th class="head"><p>Recall</p></th>
+<th class="head"><p>F1</p></th>
+<th class="head"><p>ROC AUC</p></th>
+<th class="head"><p>Tiempo (s)</p></th>
+<th class="head"><p>Mejores parámetros</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>RandomForest (sklearn)</p></td>
+<td><p>0.9204</p></td>
+<td><p>0.7818</p></td>
+<td><p>0.8337</p></td>
+<td><p>0.8070</p></td>
+<td><p>0.9511</p></td>
+<td><p>847</p></td>
+<td><p>max_depth=15, n_estimators=100</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -955,7 +1039,7 @@ para comparar posteriormente con PySpark.</p>
   <div class="footer-item">
     
 <p class="component-author">
-By The Jupyter Book Community
+By Mateo Chang, Juan Camilo Conrado, Sergio Cadavid
 </p>
 
   </div>
