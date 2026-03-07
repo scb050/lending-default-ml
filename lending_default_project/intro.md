@@ -1,11 +1,12 @@
-# Welcome to your Jupyter Book
+# Predicción de Default en Créditos – Lending Club
 
-This is a small sample book to give you a feel for how book content is
-structured.
-It shows off a few of the major file types, as well as some sample content.
-It does not go in-depth into any particular topic - check out [the Jupyter Book documentation](https://jupyterbook.org) for more information.
 
-Check out the content pages bundled with this sample book to see more.
+Este proyecto desarrolla un modelo de Machine Learning para predecir el riesgo de incumplimiento en préstamos utilizando el dataset de Lending Club.
 
-```{tableofcontents}
-```
+El análisis incluye:
+- Exploración de datos (EDA)
+- Preprocesamiento
+- Modelado con Scikit-learn
+- Modelado con PySpark
+- Interpretabilidad con LIME
+- Comparación y evaluación de modelos
